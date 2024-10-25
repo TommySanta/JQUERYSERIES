@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Coche</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="index.html">CRUD Coches</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Coches</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="crear.html">Crear Coche</a>
+                </li>
+            </ul>
+        </div>
+    </nav>    
+    <div class="container">
+        <h1>Crear Coche</h1>
+        <form id="formCrear">
+            <label for="cajamarca">Marca</label>
+            <input class="form-control" type="text" id="cajamarca" />
+            <label for="cajamodelo">Modelo</label>
+            <input class="form-control" type="text" id="cajamodelo" />
+            <label for="cajaconductor">Conductor</label>
+            <input class="form-control" type="text" id="cajaconductor" />
+            <label for="cajaimagen">Imagen</label>
+            <input class="form-control" type="text" id="cajaimagen" />
+            <div style="margin-top: 20px;">
+                <button id="btnInsertar" class="btn btn-info">Insertar</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="js/jquery-3.7.1.js"></script>
+    <script>
+        var url = "https://apiejemplos.azurewebsites.net/";
+
+        $(document).ready(function () {
+            $("#btnInsertar").click(function (e) {
+                e.preventDefault();
+                var dataJson = ObjetoCoche();
+                var request = "api/Coches/InsertCoche";
+                $.ajax({
+                    type: "POST",
+                    url: url + request,
+                    data: dataJson,
+                    contentType: "application/json",
+                    success: function () {
+                        alert("Coche insertado correctamente");
+                        location.href = 'index.html';
+                    }
+                });
+            });
+
+            function ObjetoCoche() {
+                var coche = new Object();
+                coche.marca = $("#cajamarca").val();
+                coche.modelo = $("#cajamodelo").val();
+                coche.conductor = $("#cajaconductor").val();
+                coche.imagen = $("#cajaimagen").val();
+                return JSON.stringify(coche);
+            }
+        });
+    </script>
+</body>
+</html>

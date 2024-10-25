@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRACTICA FULL STACK</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="MenuSeries.html">Home</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="NuevoperSeries.html">Nuevo personaje</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="ModificarperSeries.html">Modificar personajes</a>
+                </li>
+                <li class="nav-item">
+                    <select id="seriesSelect" class="form-control" onchange="navegarSerie(this.value)">
+                        <option value="">Series</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h3>Insertar Nuevo Personaje</h3>
+        <form id="nuevoPersonajeForm">
+            <div class="form-group">
+                <label for="nombrePersonaje">Nombre del personaje</label>
+                <input type="text" class="form-control" id="nombrePersonaje" required>
+            </div>
+            <div class="form-group">
+                <label for="imagenPersonaje">URL de la imagen del personaje</label>
+                <input type="text" class="form-control" id="imagenPersonaje" required>
+            </div>
+            <div class="form-group">
+                <label for="idSerie">Serie</label>
+                <select id="idSerie" class="form-control" required>
+                    <option value="">Selecciona una serie</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Insertar Personaje</button>
+        </form>
+    </div>
+
+    <script src="js/jquery-3.7.1.js"></script>
+    <script>
+        var url = "https://apiseriespersonajes2024.azurewebsites.net/";
+        var apiSeries = "/api/Series";
+        var apiPersonajes = "/api/Personajes";
+        var apiNewper = "/api/Personajes";
+        $(document).ready(function () {
+            $.ajax({
+                url: url + apiSeries,
+                method: "GET",
+                success: function (data) {
+                    var select = document.getElementById("seriesSelect");
+
+
+                    data.forEach(function (serie) {
+                        var option = document.createElement("option");
+                        option.value = serie.idSerie;
+                        option.textContent = serie.nombre;
+                        select.appendChild(option);
+
+                        var formOption = document.createElement("option");
+                        formOption.value = serie.idSerie;
+                        formOption.textContent = serie.nombre;
+                        $("#idSerie").append(formOption);
+                    });
+                },
+                error: function (error) {
+                    console.error("Error al cargar las series:", error);
+                }
+            });
+            $("#nuevoPersonajeForm").submit(function (event) {
+                event.preventDefault();
+
+                var nuevoPersonaje = {
+                    idPersonaje: 0, 
+                    nombre: $("#nombrePersonaje").val(),
+                    imagen: $("#imagenPersonaje").val(),
+                    idSerie: parseInt($("#idSerie").val())
+                };
+
+                if (!nuevoPersonaje.nombre || !nuevoPersonaje.imagen || !nuevoPersonaje.idSerie) {
+                    alert("Por favor, completa todos los campos.");
+                    return; 
+                }
+
+                $.ajax({
+                    url: url + apiNewper,
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(nuevoPersonaje),
+                    success: function () {
+                        alert("Personaje insertado con éxito");
+                        $("#nuevoPersonajeForm")[0].reset(); 
+                    },
+                    error: function (error) {
+                        console.error("Error al insertar el personaje:", error);
+                        alert("Error al insertar el personaje: " + error.responseText); 
+                    }
+                });
+            });
+        })
+        function navegarSerie(idSerie) {
+            if (idSerie) {
+                window.location.href = `Serie.html?id=${idSerie}`;
+            }
+        }
+
+    </script>
+</body>
+
+</html>

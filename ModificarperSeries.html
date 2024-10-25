@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRACTICA FULL STACK</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="MenuSeries.html">Home</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="NuevoperSeries.html">Nuevo personaje</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="ModificarperSeries.html">Modificar personajes</a>
+                </li>
+                <li class="nav-item">
+                    <select id="seriesSelect" class="form-control" onchange="navegarSerie(this.value)">
+                        <option value="">Series</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h3>Modificar Personaje de Serie</h3>
+        <form id="modificarPersonajeForm">
+            <div class="form-group">
+                <label for="idPersonaje">Seleccione un Personaje</label>
+                <select id="idPersonaje" class="form-control" required>
+                    <option value="">Selecciona un personaje</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nuevaSerie">Nueva Serie</label>
+                <select id="nuevaSerie" class="form-control" required>
+                    <option value="">Selecciona una serie</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+
+        <div id="resultado" class="mt-4"></div>
+        <div id="tablaPersonajes" class="mt-4"></div>
+    </div>
+
+    <script src="js/jquery-3.7.1.js"></script>
+    <script>
+        var url = "https://apiseriespersonajes2024.azurewebsites.net/";
+        var apiSeries = "/api/Series";
+        var apiPersonajes = "/api/Personajes";
+        var apiPersonajesSerie = "/api/Series/PersonajesSerie/{idserie}";
+
+        $(document).ready(function () {
+            $.ajax({
+                url: url + apiSeries,
+                method: "GET",
+                success: function (data) {
+                    var seriesSelect = $("#seriesSelect");
+                    data.forEach(function (serie) {
+                        var option = $("<option>").val(serie.idSerie).text(serie.nombre);
+                        seriesSelect.append(option);
+                    });
+                },
+                error: function (error) {
+                    console.error("Error al cargar las series:", error);
+                }
+            });
+
+            $.ajax({
+                url: url + apiPersonajes,
+                method: "GET",
+                success: function (data) {
+                    var personajesSelect = $("#idPersonaje");
+                    data.forEach(function (personaje) {
+                        var option = $("<option>").val(personaje.idPersonaje).text(personaje.nombre);
+                        personajesSelect.append(option);
+                    });
+                },
+                error: function (error) {
+                    console.error("Error al cargar los personajes:", error);
+                }
+            });
+
+            $.ajax({
+                url: url + apiSeries,
+                method: "GET",
+                success: function (data) {
+                    var nuevaSerieSelect = $("#nuevaSerie");
+                    data.forEach(function (serie) {
+                        var option = $("<option>").val(serie.idSerie).text(serie.nombre);
+                        nuevaSerieSelect.append(option);
+                    });
+                },
+                error: function (error) {
+                    console.error("Error al cargar las series:", error);
+                }
+            });
+        });
+
+        $("#modificarPersonajeForm").submit(function (event) {
+            event.preventDefault();
+
+            var idPersonaje = $("#idPersonaje").val();
+            var nuevaSerie = $("#nuevaSerie").val();
+
+            $.ajax({
+                url: url + `/api/Personajes/${idPersonaje}/${nuevaSerie}`,
+                method: "PUT",
+                success: function () {
+                    alert("Personaje cambiado de serie con éxito");
+                    mostrarPersonajesDeSerie(nuevaSerie);
+                    $("#modificarPersonajeForm")[0].reset();
+                },
+                error: function (error) {
+                    console.error("Error al cambiar el personaje de serie:", error);
+                }
+            });
+        });
+
+        function mostrarPersonajesDeSerie(idSerie) {
+            $.ajax({
+                url: url + apiPersonajesSerie.replace("{idserie}", idSerie),
+                method: "GET",
+                success: function (data) {
+                    var tabla = "<h4>Personajes en la serie seleccionada</h4><table class='table table-bordered'><thead><tr><th>Nombre</th><th>Imagen</th></tr></thead><tbody>";
+                    data.forEach(function (personaje) {
+                        tabla += `<tr><td>${personaje.nombre}</td><td><img src="${personaje.imagen}" alt="${personaje.nombre}" style="width:100px;"/></td></tr>`;
+                    });
+                    tabla += "</tbody></table>";
+                    $("#tablaPersonajes").html(tabla);
+                },
+                error: function (error) {
+                    console.error("Error al cargar los personajes de la serie:", error);
+                }
+            });
+        }
+        function navegarSerie(idSerie) {
+            if (idSerie) {
+                window.location.href = `Serie.html?id=${idSerie}`;
+            }
+        }
+    </script>
+</body>
+
+</html>

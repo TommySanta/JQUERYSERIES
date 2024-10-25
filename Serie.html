@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Serie</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="MenuSeries.html">Home</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="NuevoperSeries.html">Nuevo personaje</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="ModificarperSeries.html">Modificar personajes</a>
+                </li>
+                <li class="nav-item">
+                    <select id="seriesSelect" class="form-control" onchange="navegarSerie(this.value)">
+                        <option value="">Series</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="serieCard" class="card text-center">
+            <img id="imagenSerie" src="" alt="Imagen de la serie" class="card-img-top" style="max-width: 300px; margin: auto;">
+            <div class="card-body">
+                <h3 id="nombreSerie" class="card-title">Nombre de la serie</h3>
+                <p><strong>Puntuación:</strong> <span id="puntuacionSerie"></span></p>
+                <button id="mostrarPersonajesBtn" class="btn btn-primary">Personajes</button>
+            </div>
+        </div>
+
+        <div id="personajesTabla" class="d-none">
+            <button id="volverBtn" class="btn btn-secondary mb-3">Volver</button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre del Personaje</th>
+                        <th>Imagen</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPersonajes">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/jquery-3.7.1.js"></script>
+    <script>
+        $(document).ready(function() {
+            const url = "https://apiseriespersonajes2024.azurewebsites.net";
+            const apiSeries = "/api/Series";
+            const apiPersonajesSerie = "/api/Series/PersonajesSerie";
+            let idSerie = obtenerIdSerie();
+
+            $.ajax({
+                url: url + apiSeries,
+                method: "GET",
+                success: function(data) {
+                    var select = document.getElementById("seriesSelect");
+                    data.forEach(function(serie) {
+                        var option = document.createElement("option");
+                        option.value = serie.idSerie;
+                        option.textContent = serie.nombre;
+                        select.appendChild(option);
+                    });
+
+                    if (idSerie) {
+                        select.value = idSerie;
+                    }
+                },
+                error: function(error) {
+                    console.error("Error al cargar las series:", error);
+                }
+            });
+
+            function obtenerIdSerie() {
+                const params = new URLSearchParams(window.location.search);
+                return params.get("id");
+            }
+
+            function loadSerie() {
+                if (!idSerie) {
+                    console.error("ID de serie no especificado en la URL");
+                    return;
+                }
+
+                $.ajax({
+                    type: "GET",
+                    url: url + apiSeries + "/" + idSerie,
+                    success: function(serie) {
+                        $("#nombreSerie").text(serie.nombre);
+                        $("#imagenSerie").attr("src", serie.imagen);
+                        $("#puntuacionSerie").text(serie.puntuacion);
+                    },
+                    error: function(error) {
+                        console.error("Error al cargar la serie:", error);
+                    }
+                });
+            }
+
+            function loadPersonajes() {
+                $.ajax({
+                    type: "GET",
+                    url: url + apiPersonajesSerie + "/" + idSerie,
+                    success: function(data) {
+                        var html = "";
+                        $.each(data, function(index, personaje) {
+                            html += "<tr>";
+                            html += "<td>" + personaje.nombre + "</td>";
+                            html += "<td><img src='" + personaje.imagen + "' style='width: 100px;' alt='Imagen de " + personaje.nombre + "'/></td>";
+                            html += "</tr>";
+                        });
+                        $("#listaPersonajes").html(html);
+                    },
+                    error: function(error) {
+                        console.error("Error al cargar los personajes:", error);
+                    }
+                });
+            }
+            $("#mostrarPersonajesBtn").click(function() {
+                loadPersonajes();
+                $("#serieCard").addClass("d-none");
+                $("#personajesTabla").removeClass("d-none");
+            });
+
+            $("#volverBtn").click(function() {
+                $("#serieCard").removeClass("d-none");
+                $("#personajesTabla").addClass("d-none");
+            });
+
+            loadSerie();
+        });
+        function navegarSerie(idSerie) {
+                if (idSerie) {
+                    window.location.href = `Serie.html?id=${idSerie}`;
+                }
+            }
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD coches</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="index.html">Menu Series</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Coches</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="crear.html">Crear Coche</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Listado de Coches</h1>
+        <table id="tabla" class="table table-hover table-bordered">
+            <thead class="table table-success">
+                <tr>
+                    <th>Id</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Conductor</th>
+                    <th>Imagen</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="table table-active"></tbody>
+        </table>
+    </div>
+
+    <script src="js/jquery-3.7.1.js"></script>
+    <script>
+        var url = "https://apiejemplos.azurewebsites.net/";
+
+        $(document).ready(function () {
+            loadCoches();
+
+            function loadCoches() {
+                var request = "api/Coches";
+                $.ajax({
+                    type: "GET",
+                    url: url + request,
+                    success: function (data) {
+                        var html = "";
+                        $.each(data, function (index, coche) {
+                            html += "<tr>";
+                            html += "<td>" + coche.idCoche + "</td>";
+                            html += "<td>" + coche.marca + "</td>";
+                            html += "<td>" + coche.modelo + "</td>";
+                            html += "<td>" + coche.conductor + "</td>";
+                            html += "<td><img style='width:150px;' src='" + coche.imagen + "'/></td>";
+                            html += "<td>";
+                            html += "<button class='btn btn-warning' onclick='location.href=\"modificar.html?id=" + coche.idCoche + "\"'>Modificar</button>";
+                            html += "<button class='btn btn-danger' onclick='eliminarCoche(" + coche.idCoche + ")'>Eliminar</button>";
+                            html += "</td>";
+                            html += "</tr>";
+                        });
+                        $("#tabla tbody").html(html);
+                    }
+                });
+            }
+
+            window.eliminarCoche = function (id) {
+                var request = "api/Coches/DeleteCoche/" + id;
+                $.ajax({
+                    type: "DELETE",
+                    url: url + request,
+                    success: function () {
+                        alert("Coche eliminado");
+                        loadCoches();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
